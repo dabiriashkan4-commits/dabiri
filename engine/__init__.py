@@ -1,4 +1,4 @@
-"""Deterministic synthetic market-analysis engine for the demo dashboard."""
+"""Fail-closed, non-executable market-data engine for the XAUUSD dashboard."""
 
 from .analysis import build_analysis
 

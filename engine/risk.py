@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 
-def assess_risk(volatility_ratio: float, event_count: int) -> dict[str, object]:
-    reasons: list[str] = ["synthetic data is non-executable"]
-    verdict = "CAUTION"
-    if volatility_ratio >= 1.25:
-        reasons.append("elevated synthetic volatility")
-    if event_count:
-        reasons.append("demo events require reassessment")
-    if volatility_ratio >= 1.5 or event_count >= 2:
-        verdict = "VETO"
+def assess_data_risk(*, data_available: bool, history_available: bool) -> dict[str, object]:
+    reasons: list[str] = []
+    if not data_available:
+        reasons.append("validated live quote is unavailable")
+    if not history_available:
+        reasons.append("validated historical OHLC is unavailable")
+    reasons.append("technical, macro, news and sentiment evidence is incomplete")
+    verdict = "VETO" if not data_available else "CAUTION"
     return {"verdict": verdict, "reasons": reasons, "trade_execution": False}
