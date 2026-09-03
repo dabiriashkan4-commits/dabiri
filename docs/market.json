@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-03T16:08:25Z",
+  "refresh_policy_seconds": 600,
+  "instrument": "XAUUSD",
+  "quote": {
+    "instrument": "XAUUSD",
+    "base": "XAU",
+    "quote": "USD",
+    "unit": "troy_ounce",
+    "price": 4490.200195,
+    "observed_at": "2026-09-03T16:07:54Z",
+    "fetched_at": "2026-09-03T16:08:25Z",
+    "age_seconds": 31.531,
+    "provider": "gold-api.com",
+    "source_url": "https://api.gold-api.com/price/XAU/USD",
+    "quality": "live",
+    "change_percent": 2.773
+  },
+  "reference": {
+    "symbol": "GC=F",
+    "price": 4537.0,
+    "observed_at": "2026-09-03T15:58:19Z",
+    "provider": "Yahoo Finance · CME gold futures reference",
+    "source_url": "https://finance.yahoo.com/quote/GC%3DF/"
+  },
+  "liquidity": {
+    "timeframe": "1H",
+    "lookback_bars": 360,
+    "atr": 21.4715,
+    "confidence": "medium",
+    "directional_bias": "upward",
+    "upper_probability": 70,
+    "lower_probability": 30,
+    "zones": [
+      {
+        "side": "above",
+        "low": 4609.7103,
+        "high": 4617.4401,
+        "midpoint": 4613.5752,
+        "touches": 4,
+        "rank": "secondary",
+        "model_probability": null
+      },
+      {
+        "side": "above",
+        "low": 4506.0853,
+        "high": 4513.8151,
+        "midpoint": 4509.9502,
+        "touches": 2,
+        "rank": "primary",
+        "model_probability": 70
+      },
+      {
+        "side": "below",
+        "low": 4414.0352,
+        "high": 4421.7649,
+        "midpoint": 4417.9001,
+        "touches": 3,
+        "rank": "primary",
+        "model_probability": 30
+      },
+      {
+        "side": "below",
+        "low": 4392.5353,
+        "high": 4400.265,
+        "midpoint": 4396.4001,
+        "touches": 4,
+        "rank": "secondary",
+        "model_probability": null
+      }
+    ],
+    "proxy_adjusted": true,
+    "methodology": "Clustered 1H swing highs/lows, touch count, ATR distance, 12-hour momentum and EMA20/EMA50 trend.",
+    "limitation": "Price-action liquidity proxy; not an order book or a measurement of resting orders."
+  },
+  "decision": "WAIT",
+  "trade_execution": false
+}
