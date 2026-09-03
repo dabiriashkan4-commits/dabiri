@@ -28,6 +28,7 @@ jobs:
           python-version: "3.12"
       - name: Refresh validated market snapshot
         run: python scripts/build_pages_data.py
+        continue-on-error: true
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload dashboard
