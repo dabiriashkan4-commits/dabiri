@@ -146,6 +146,25 @@ class CoreTests(unittest.TestCase):
         self.assertIn("fallback ساختگی", html)
         self.assertNotIn("SYNTHETIC / DEMO", html)
 
+    def test_pages_dashboard_keeps_all_research_lanes_and_liquidity(self) -> None:
+        html = (Path(__file__).resolve().parents[1] / "docs" / "index.html").read_text(encoding="utf-8")
+        required_sections = (
+            'id="technical"',
+            'id="macro"',
+            'id="catalysts"',
+            'id="sentiment"',
+            'id="risk"',
+            'id="liquidity"',
+            'id="scenarios"',
+            'id="sources"',
+        )
+        for section in required_sections:
+            with self.subTest(section=section):
+                self.assertIn(section, html)
+        self.assertIn("فاندامنتال", html)
+        self.assertIn("سنتیمنت", html)
+        self.assertIn("جایگزین بخش‌های دیگر نیست", html)
+
     def test_embedded_payload_is_strict_json(self) -> None:
         html = render_dashboard(self.payload)
         match = re.search(r'<script type="application/json" id="dashboard-data">(.*?)</script>', html, re.DOTALL)
