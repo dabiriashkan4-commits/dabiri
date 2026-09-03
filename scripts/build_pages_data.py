@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from engine.data import fetch_live_quote, normalize_quote
+from scripts.research_feeds import collect, stamp, yahoo_result
 
 
 OUTPUT = ROOT / "docs" / "market.json"
@@ -60,9 +61,12 @@ def _fetch_json(url: str) -> dict[str, Any]:
     return payload
 
 
-def _history() -> tuple[list[Candle], float, str, float | None]:
-    payload = _fetch_json(YAHOO_API)
-    result = ((payload.get("chart") or {}).get("result") or [None])[0]
+def _history(daily=False) -> tuple[list[Candle], float, str, float | None]:
+    if daily:
+        result = yahoo_result("GC=F", "1d", "1y")
+    else:
+        payload = _fetch_json(YAHOO_API)
+        result = ((payload.get("chart") or {}).get("result") or [None])[0]
     if not isinstance(result, dict):
         raise RuntimeError("historical market response is unavailable")
     meta = result.get("meta") or {}
@@ -72,6 +76,10 @@ def _history() -> tuple[list[Candle], float, str, float | None]:
     market_time = meta.get("regularMarketTime")
     if not _positive(current) or not _positive(market_time):
         raise RuntimeError("historical market quote is invalid")
+    if meta.get("symbol") != YAHOO_SYMBOL or meta.get("currency") != "USD":
+        raise RuntimeError("unexpected historical instrument")
+    if market_time > time.time() + 120:
+        raise RuntimeError("future reference quote")
     opens, highs, lows, closes = (
         series.get("open") or [],
         series.get("high") or [],
@@ -87,7 +95,9 @@ def _history() -> tuple[list[Candle], float, str, float | None]:
             lows[index] if index < len(lows) else None,
             closes[index] if index < len(closes) else None,
         )
-        if all(_positive(value) for value in values) and float(values[2]) >= float(values[3]):
+        if (all(_positive(value) for value in values)
+                and values[0] + (86400 if daily else 3600) <= time.time()
+                and values[3] <= min(values[1], values[4]) <= max(values[1], values[4]) <= values[2]):
             candles.append(
                 Candle(
                     int(values[0]),
@@ -99,6 +109,9 @@ def _history() -> tuple[list[Candle], float, str, float | None]:
             )
     if len(candles) < 80:
         raise RuntimeError("insufficient validated 1H history")
+    if len({c.timestamp for c in candles}) != len(candles):
+        raise RuntimeError("duplicate candles")
+    candles.sort(key=lambda c: c.timestamp)
     change = meta.get("regularMarketChangePercent")
     return (
         candles[-360:],
@@ -232,38 +245,117 @@ def _liquidity(candles: list[Candle], spot: float, futures: float) -> dict[str, 
     }
 
 
+def _rsi(values, period=14):
+    if len(values) < period+1:
+        return None
+    diffs = [b-a for a, b in zip(values, values[1:])]
+    gain = sum(max(0, d) for d in diffs[:period])/period
+    loss = sum(max(0, -d) for d in diffs[:period])/period
+    for d in diffs[period:]:
+        gain = (gain*(period-1)+max(0, d))/period
+        loss = (loss*(period-1)+max(0, -d))/period
+    return 50.0 if gain == loss == 0 else 100.0 if loss == 0 else 100-100/(1+gain/loss)
+
+
+def _h4(candles):
+    groups = {}
+    for c in candles:
+        groups.setdefault(c.timestamp//14400, []).append(c)
+    result = []
+    for rows in groups.values():
+        rows.sort(key=lambda x: x.timestamp)
+        if len(rows) == 4 and all(b.timestamp-a.timestamp == 3600 for a, b in zip(rows, rows[1:])):
+            result.append(Candle(rows[0].timestamp, rows[0].open, max(c.high for c in rows), min(c.low for c in rows), rows[-1].close))
+    return result
+
+
+def technical(candles, seconds):
+    if len(candles) < 50:
+        return {"status": "unavailable", "reason": "Insufficient completed candles"}
+    closes = [c.close for c in candles]
+    ema20, ema50 = _ema(closes, 20), _ema(closes, 50)
+    observed = datetime.fromtimestamp(candles[-1].timestamp+seconds, timezone.utc)
+    return {"status": "available" if (datetime.now(timezone.utc)-observed).total_seconds() < max(96*3600, seconds*3) else "stale",
+            "observed_at": stamp(observed), "bars": len(candles), "close": closes[-1], "ema20": round(ema20, 3), "ema50": round(ema50, 3),
+            "rsi14": round(_rsi(closes), 2), "atr14": round(_atr(candles), 3),
+            "support": min(c.low for c in candles[-20:]), "resistance": max(c.high for c in candles[-20:]),
+            "trend": "bullish" if closes[-1] > ema20 > ema50 else "bearish" if closes[-1] < ema20 < ema50 else "mixed",
+            "source": "Yahoo Finance · GC=F futures (not spot)", "source_url": YAHOO_PAGE}
+
+
+def risk_gate(payload, now):
+    reasons = ["unreviewed", "proxy", "uncalibrated", "news_coverage", "missing_options_etf"]
+    quote = payload.get("quote")
+    if not quote or (now-datetime.fromisoformat(quote["observed_at"].replace("Z", "+00:00"))).total_seconds() > 300:
+        reasons.append("quote_unavailable")
+    if not payload.get("liquidity") or payload["liquidity"].get("status") != "available":
+        reasons.append("liquidity_unavailable")
+    r = payload.get("research", {})
+    if any(payload.get("technical", {}).get(k, {}).get("status") != "available" for k in ["H1", "H4", "D1"]):
+        reasons.append("technical_gap")
+    if any(r.get(k, {}).get("status") != "available" for k in ["real10y", "nominal10y", "nominal2y", "dxy", "fed_upper", "cpi"]):
+        reasons.append("macro_gap")
+    if r.get("positioning", {}).get("status") in ["unavailable", "stale", None]:
+        reasons.append("positioning_gap")
+    if r.get("calendar", {}).get("status") != "available":
+        reasons.append("calendar_gap")
+    else:
+        for e in r["calendar"].get("items", []):
+            delta = (datetime.fromisoformat(e["scheduled_at"].replace("Z", "+00:00"))-now).total_seconds()
+            if -3600 <= delta <= 24*3600:
+                reasons.append("event_risk")
+                break
+    return {"verdict": "VETO" if any(k in reasons for k in ["quote_unavailable", "liquidity_unavailable", "event_risk"]) else "CAUTION",
+            "reasons": reasons, "kind": "automated_data_gate_not_agent_review", "checked_at": stamp(now)}
+
+
 def build_payload() -> dict[str, Any]:
-    quote_fixture = os.getenv("GOLD_QUOTE_INPUT_FILE")
-    quote = (
-        normalize_quote(json.loads(Path(quote_fixture).read_text(encoding="utf-8")))
-        if quote_fixture
-        else fetch_live_quote()
-    )
-    candles, futures_price, futures_observed_at, change_percent = _history()
-    return {
-        "schema_version": 1,
-        "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-        "refresh_policy_seconds": 600,
-        "instrument": "XAUUSD",
-        "quote": {**quote, "quality": "live", "change_percent": change_percent},
-        "reference": {
-            "symbol": YAHOO_SYMBOL,
-            "price": round(futures_price, 6),
-            "observed_at": futures_observed_at,
-            "provider": "Yahoo Finance · CME gold futures reference",
-            "source_url": YAHOO_PAGE,
-        },
-        "liquidity": _liquidity(candles, float(quote["price"]), futures_price),
-        "decision": "WAIT",
-        "trade_execution": False,
-    }
+    now = datetime.now(timezone.utc)
+    payload = {"schema_version": 2, "generated_at": stamp(now), "refresh_policy_seconds": 600,
+               "instrument": "XAUUSD", "quote": None, "reference": None, "liquidity": None,
+               "technical": {}, "errors": {}, "decision": "WAIT", "trade_execution": False}
+    try:
+        fixture = os.getenv("GOLD_QUOTE_INPUT_FILE")
+        q = normalize_quote(json.loads(Path(fixture).read_text(encoding="utf-8"))) if fixture else fetch_live_quote()
+        payload["quote"] = {**q, "quality": "live" if q["age_seconds"] <= 90 else "delayed"}
+    except Exception:
+        payload["errors"]["quote"] = "Source unavailable or quote failed freshness validation"
+    try:
+        candles, price, observed, change = _history()
+        payload["reference"] = {"symbol": YAHOO_SYMBOL, "price": price, "observed_at": observed,
+                                "change_percent": change, "provider": "Yahoo Finance · GC=F", "source_url": YAHOO_PAGE}
+        payload["technical"]["H1"] = technical(candles, 3600)
+        payload["technical"]["H4"] = technical(_h4(candles), 14400)
+        if payload["quote"] and (now-datetime.fromisoformat(observed.replace("Z", "+00:00"))).total_seconds() <= 3600:
+            liq = _liquidity(candles, payload["quote"]["price"], price)
+            liq.update(status="available", observed_at=observed, calculated_at=stamp(),
+                       reference_spot=payload["quote"]["price"], kind="uncalibrated_attraction_score", calibrated_probability=None)
+            # Scores are model outputs, not calibrated probabilities of a price path.
+            liq["upper_score"] = liq.pop("upper_probability")
+            liq["lower_score"] = liq.pop("lower_probability")
+            for zone in liq["zones"]:
+                zone["attraction_score"] = zone.pop("model_probability")
+            payload["liquidity"] = liq
+    except Exception:
+        payload["errors"]["history"] = "Source unavailable or invalid completed history"
+    try:
+        daily, _, _, _ = _history(daily=True)
+        payload["technical"]["D1"] = technical(daily, 86400)
+    except Exception:
+        payload["technical"]["D1"] = {"status": "unavailable"}
+    payload["research"] = collect(datetime.now(timezone.utc))
+    payload["risk"] = risk_gate(payload, datetime.now(timezone.utc))
+    payload["generated_at"] = stamp()
+    return payload
 
 
 def main() -> None:
     payload = build_payload()
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(json.dumps(payload, ensure_ascii=False, allow_nan=False, indent=2) + "\n", encoding="utf-8")
-    print(f"wrote docs/market.json with {len(payload['liquidity']['zones'])} liquidity zones")
+    temporary = OUTPUT.with_suffix('.json.tmp')
+    temporary.write_text(json.dumps(payload, ensure_ascii=False, allow_nan=False, indent=2) + "\n", encoding="utf-8")
+    temporary.replace(OUTPUT)
+    print("Wrote validated data snapshot; risk gate:", payload["risk"]["verdict"])
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 {
-  "schema_version": 1,
-  "generated_at": "2026-09-03T16:08:25Z",
+  "schema_version": 2,
+  "generated_at": "2026-09-03T21:40:53Z",
   "refresh_policy_seconds": 600,
   "instrument": "XAUUSD",
   "quote": {
@@ -8,72 +8,312 @@
     "base": "XAU",
     "quote": "USD",
     "unit": "troy_ounce",
-    "price": 4490.200195,
-    "observed_at": "2026-09-03T16:07:54Z",
-    "fetched_at": "2026-09-03T16:08:25Z",
-    "age_seconds": 31.531,
+    "price": 4474.200195,
+    "observed_at": "2026-09-03T21:39:55Z",
+    "fetched_at": "2026-09-03T21:40:25Z",
+    "age_seconds": 30.557,
     "provider": "gold-api.com",
     "source_url": "https://api.gold-api.com/price/XAU/USD",
-    "quality": "live",
-    "change_percent": 2.773
+    "quality": "live"
   },
   "reference": {
     "symbol": "GC=F",
-    "price": 4537.0,
-    "observed_at": "2026-09-03T15:58:19Z",
-    "provider": "Yahoo Finance · CME gold futures reference",
+    "price": 4520.3,
+    "observed_at": "2026-09-03T21:00:00Z",
+    "change_percent": 2.394,
+    "provider": "Yahoo Finance · GC=F",
     "source_url": "https://finance.yahoo.com/quote/GC%3DF/"
   },
   "liquidity": {
     "timeframe": "1H",
     "lookback_bars": 360,
-    "atr": 21.4715,
+    "atr": 20.4786,
     "confidence": "medium",
     "directional_bias": "upward",
-    "upper_probability": 70,
-    "lower_probability": 30,
     "zones": [
       {
         "side": "above",
-        "low": 4609.7103,
-        "high": 4617.4401,
-        "midpoint": 4613.5752,
+        "low": 4610.589,
+        "high": 4617.9613,
+        "midpoint": 4614.2752,
         "touches": 4,
         "rank": "secondary",
-        "model_probability": null
+        "attraction_score": null
       },
       {
         "side": "above",
-        "low": 4506.0853,
-        "high": 4513.8151,
-        "midpoint": 4509.9502,
-        "touches": 2,
-        "rank": "primary",
-        "model_probability": 70
-      },
-      {
-        "side": "below",
-        "low": 4414.0352,
-        "high": 4421.7649,
-        "midpoint": 4417.9001,
+        "low": 4507.5474,
+        "high": 4514.9197,
+        "midpoint": 4511.2335,
         "touches": 3,
         "rank": "primary",
-        "model_probability": 30
+        "attraction_score": 70
       },
       {
         "side": "below",
-        "low": 4392.5353,
-        "high": 4400.265,
-        "midpoint": 4396.4001,
+        "low": 4414.9139,
+        "high": 4422.2862,
+        "midpoint": 4418.6001,
+        "touches": 3,
+        "rank": "primary",
+        "attraction_score": 30
+      },
+      {
+        "side": "below",
+        "low": 4393.414,
+        "high": 4400.7863,
+        "midpoint": 4397.1001,
         "touches": 4,
         "rank": "secondary",
-        "model_probability": null
+        "attraction_score": null
       }
     ],
     "proxy_adjusted": true,
     "methodology": "Clustered 1H swing highs/lows, touch count, ATR distance, 12-hour momentum and EMA20/EMA50 trend.",
-    "limitation": "Price-action liquidity proxy; not an order book or a measurement of resting orders."
+    "limitation": "Price-action liquidity proxy; not an order book or a measurement of resting orders.",
+    "status": "available",
+    "observed_at": "2026-09-03T21:00:00Z",
+    "calculated_at": "2026-09-03T21:40:26Z",
+    "reference_spot": 4474.200195,
+    "kind": "uncalibrated_attraction_score",
+    "calibrated_probability": null,
+    "upper_score": 70,
+    "lower_score": 30
   },
+  "technical": {
+    "H1": {
+      "status": "available",
+      "observed_at": "2026-09-03T21:00:00Z",
+      "bars": 360,
+      "close": 4520.0,
+      "ema20": 4498.526,
+      "ema50": 4469.402,
+      "rsi14": 62.59,
+      "atr14": 20.479,
+      "support": 4432.2001953125,
+      "resistance": 4558.5,
+      "trend": "bullish",
+      "source": "Yahoo Finance · GC=F futures (not spot)",
+      "source_url": "https://finance.yahoo.com/quote/GC%3DF/"
+    },
+    "H4": {
+      "status": "available",
+      "observed_at": "2026-09-03T20:00:00Z",
+      "bars": 78,
+      "close": 4522.89990234375,
+      "ema20": 4484.04,
+      "ema50": 4520.403,
+      "rsi14": 53.99,
+      "atr14": 43.107,
+      "support": 4329.2001953125,
+      "resistance": 4558.5,
+      "trend": "mixed",
+      "source": "Yahoo Finance · GC=F futures (not spot)",
+      "source_url": "https://finance.yahoo.com/quote/GC%3DF/"
+    },
+    "D1": {
+      "status": "available",
+      "observed_at": "2026-09-03T04:00:00Z",
+      "bars": 252,
+      "close": 4366.2998046875,
+      "ema20": 4418.653,
+      "ema50": 4341.4,
+      "rsi14": 48.5,
+      "atr14": 81.114,
+      "support": 4228.0,
+      "resistance": 4670.89990234375,
+      "trend": "mixed",
+      "source": "Yahoo Finance · GC=F futures (not spot)",
+      "source_url": "https://finance.yahoo.com/quote/GC%3DF/"
+    }
+  },
+  "errors": {},
   "decision": "WAIT",
-  "trade_execution": false
+  "trade_execution": false,
+  "research": {
+    "real10y": {
+      "value": 2.45,
+      "previous": 2.44,
+      "change": 0.01,
+      "observed_at": "2026-09-02T00:00:00Z",
+      "date_only": true,
+      "unit": "%",
+      "status": "available",
+      "source": "Federal Reserve H.15",
+      "source_url": "https://www.federalreserve.gov/releases/h15/",
+      "checked_at": "2026-09-03T21:40:27Z"
+    },
+    "nominal10y": {
+      "value": 4.79,
+      "previous": 4.79,
+      "change": 0.0,
+      "observed_at": "2026-09-02T00:00:00Z",
+      "date_only": true,
+      "unit": "%",
+      "status": "available",
+      "source": "Federal Reserve H.15",
+      "source_url": "https://www.federalreserve.gov/releases/h15/",
+      "checked_at": "2026-09-03T21:40:27Z"
+    },
+    "nominal2y": {
+      "value": 4.39,
+      "previous": 4.39,
+      "change": 0.0,
+      "observed_at": "2026-09-02T00:00:00Z",
+      "date_only": true,
+      "unit": "%",
+      "status": "available",
+      "source": "Federal Reserve H.15",
+      "source_url": "https://www.federalreserve.gov/releases/h15/",
+      "checked_at": "2026-09-03T21:40:27Z"
+    },
+    "fed_upper": {
+      "status": "unavailable",
+      "checked_at": "2026-09-03T21:40:27Z",
+      "reason": "Source unavailable or response failed validation",
+      "source": "FRED",
+      "source_url": "https://fred.stlouisfed.org/series/DFEDTARU"
+    },
+    "cpi": {
+      "status": "unavailable",
+      "checked_at": "2026-09-03T21:40:27Z",
+      "reason": "Source unavailable or response failed validation",
+      "source": "FRED",
+      "source_url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    "dxy": {
+      "value": 99.007,
+      "previous": 99.55999755859375,
+      "change": -0.553,
+      "unit": "index",
+      "observed_at": "2026-09-03T21:30:19Z",
+      "source": "Yahoo Finance",
+      "source_url": "https://finance.yahoo.com/quote/DX-Y.NYB/",
+      "status": "available",
+      "checked_at": "2026-09-03T21:40:27Z"
+    },
+    "vix": {
+      "value": 14.32,
+      "previous": 15.199999809265137,
+      "change": -0.88,
+      "unit": "index",
+      "observed_at": "2026-09-03T20:15:01Z",
+      "source": "Yahoo Finance",
+      "source_url": "https://finance.yahoo.com/quote/%5EVIX/",
+      "status": "available",
+      "checked_at": "2026-09-03T21:40:27Z"
+    },
+    "sp500": {
+      "value": 7747.71,
+      "previous": 7666.60009765625,
+      "change": 81.1099,
+      "unit": "index",
+      "observed_at": "2026-09-03T20:49:08Z",
+      "source": "Yahoo Finance",
+      "source_url": "https://finance.yahoo.com/quote/%5EGSPC/",
+      "status": "available",
+      "checked_at": "2026-09-03T21:40:27Z"
+    },
+    "positioning": {
+      "long": 159819,
+      "short": 15072,
+      "net": 144747,
+      "open_interest": 427957,
+      "observed_at": "2026-08-25T00:00:00Z",
+      "date_only": true,
+      "status": "lagged",
+      "source": "CFTC · COMEX Gold futures only",
+      "source_url": "https://www.cftc.gov/dea/futures/other_sf.htm",
+      "checked_at": "2026-09-03T21:40:27Z"
+    },
+    "news": {
+      "items": [
+        {
+          "title": "Waller, The Economic Outlook and Some Comments on My Policy Communication",
+          "url": "https://www.federalreserve.gov/newsevents/speech/waller20260903a.htm",
+          "published_at": "2026-09-03T12:30:00Z",
+          "source": "Federal Reserve"
+        },
+        {
+          "title": "Barr, Unlocking Opportunities for Workers and Entrepreneurs with a Criminal Record",
+          "url": "https://www.federalreserve.gov/newsevents/speech/barr20260901a.htm",
+          "published_at": "2026-09-01T13:05:00Z",
+          "source": "Federal Reserve"
+        },
+        {
+          "title": "Warsh, In Our Time",
+          "url": "https://www.federalreserve.gov/newsevents/speech/warsh20260828a.htm",
+          "published_at": "2026-08-28T14:00:00Z",
+          "source": "Federal Reserve"
+        },
+        {
+          "title": "Cook, Outlook for the U.S. and Alaskan Economies",
+          "url": "https://www.federalreserve.gov/newsevents/speech/cook20260805a.htm",
+          "published_at": "2026-08-05T20:05:00Z",
+          "source": "Federal Reserve"
+        }
+      ],
+      "status": "available",
+      "checked_at": "2026-09-03T21:40:27Z",
+      "source_url": "https://www.federalreserve.gov/feeds/speeches.xml"
+    },
+    "policy_news": {
+      "items": [
+        {
+          "title": "Minutes of the Board's discount rate meetings on July 20 and July 29, 2026",
+          "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260825a.htm",
+          "published_at": "2026-08-25T18:00:00Z",
+          "source": "Federal Reserve"
+        },
+        {
+          "title": "Minutes of the Federal Open Market Committee, July 28–29, 2026",
+          "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260819a.htm",
+          "published_at": "2026-08-19T18:00:00Z",
+          "source": "Federal Reserve"
+        }
+      ],
+      "status": "available",
+      "checked_at": "2026-09-03T21:40:27Z",
+      "source_url": "https://www.federalreserve.gov/feeds/press_monetary.xml"
+    },
+    "calendar": {
+      "status": "unavailable",
+      "checked_at": "2026-09-03T21:40:27Z",
+      "reason": "Source unavailable or response failed validation",
+      "source_url": "https://www.bls.gov/schedule/news_release/bls.ics"
+    },
+    "fed_effective": {
+      "value": 3.63,
+      "previous": 3.63,
+      "change": 0.0,
+      "observed_at": "2026-09-02T00:00:00Z",
+      "date_only": true,
+      "unit": "%",
+      "status": "available",
+      "source": "Federal Reserve H.15",
+      "source_url": "https://www.federalreserve.gov/releases/h15/",
+      "checked_at": "2026-09-03T21:40:27Z"
+    },
+    "coverage": {
+      "news": "Federal Reserve only; not a comprehensive geopolitical news feed",
+      "positioning": "Weekly futures positions, not current spot order flow",
+      "etf_flows": "unavailable",
+      "options": "unavailable",
+      "fed_probabilities": "unavailable"
+    }
+  },
+  "risk": {
+    "verdict": "CAUTION",
+    "reasons": [
+      "unreviewed",
+      "proxy",
+      "uncalibrated",
+      "news_coverage",
+      "missing_options_etf",
+      "macro_gap",
+      "calendar_gap"
+    ],
+    "kind": "automated_data_gate_not_agent_review",
+    "checked_at": "2026-09-03T21:40:53Z"
+  }
 }
